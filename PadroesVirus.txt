@@ -1,0 +1,5 @@
+>variante B12.1
+GGAGA
+>variante C4.3
+AAAG
+>EOF
