@@ -46,6 +46,6 @@ int main(){
     if (i>=0){
         printf("Encontrou na posição %i .\n", i);
     }
-    printf(" ");
+    printf("  ");
     return 0;
 }
