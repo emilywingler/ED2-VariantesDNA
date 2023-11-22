@@ -23,6 +23,7 @@ int kmp(char *texto, int ttam, char *padrao, int ptam){
     int i;
     int *pi = preprocessamento(padrao,ptam);
     int k = -1;
+    int count = 0;
     if(!pi){
         return -1;
     }
@@ -30,22 +31,21 @@ int kmp(char *texto, int ttam, char *padrao, int ptam){
         while(k > -1 && padrao[k+1] != texto[i]) k = pi[k];
         if(texto[i] == padrao[k+1]) k++;
         if(k == ptam - 1){
-            free(pi);
-            return i - k;
+            //free(pi);
+            printf("Encontrou na posição %i .\n", i - k);
+            count++;
         }
     }
+    return count;
 }
 
 int main(){
     char texto[] = "abacaabaccabacabaabb";
     char *ch = texto;
-    char padrao[] = "abacab";
+    char padrao[] = "aba";
 
     int i, j;
     i = kmp(texto, strlen(texto), padrao, strlen(padrao));
-    if (i>=0){
-        printf("Encontrou na posição %i .\n", i);
-    }
-    printf("  ");
+    printf("Vezes em que o padrão apareceu: %i\n", i);
     return 0;
 }
