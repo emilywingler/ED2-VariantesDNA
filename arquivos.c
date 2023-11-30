@@ -1,10 +1,13 @@
+//Os arquivos estão sendo salvos como uma pilha (lobo guará vem antes de onça pintada na saída), 
+//mas eles devem ser uma fila para que saiam na ordem correta
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
 // Definição de estrutura para representar um nó na lista
 typedef struct No {
-    char *identificador_descricao; // Identificador e descrição combinados
+    char *id; // Identificador e descrição combinados
     char *dados;                    // Sequência de DNA
     struct No *prox;
 } Sequencia;
@@ -43,7 +46,9 @@ int main() {
     while (fgets(linha, sizeof(linha), arquivo) != NULL) {
         // Remove '\n' da linha, se houver
         linha[strcspn(linha, "\n")] = '\0';
-
+        if(linha[0] == '>' && linha[1] == 'E' && linha[2] == 'O' && linha[3] == 'F'){
+            break;
+        }
         if (linha[0] == '>') {
             // Alocando memória para o novo nó
             especie = (Sequencia *)malloc(sizeof(Sequencia));
@@ -55,7 +60,7 @@ int main() {
             }
 
             // Combinando identificador e descrição em uma única string
-            especie->identificador_descricao = strdup(&linha[1]); // Ignora o '>'
+            especie->id = strdup(&linha[1]); // Ignora o '>'
             
             // Inicializa a sequência de DNA
             especie->dados = NULL;
@@ -64,30 +69,30 @@ int main() {
             especie->prox = inicio;
             inicio = especie;
         } else {
-            while (fgets(linha, sizeof(linha), arquivo) != NULL && linha[0] != '>') {
-                char *limpaDado = limparSequencia(linha);
+            // Limpa a sequência apenas se não for uma nova espécie
+            char *limpaDado = limparSequencia(linha);
 
-                // Verifica se dado é NULL ou não
-                if (especie->dados == NULL) {
-                    especie->dados = strdup(limpaDado); // Aloca e copia
-                } else {
-                    especie->dados = realloc(especie->dados, (strlen(especie->dados) + strlen(limpaDado) + 1) * sizeof(char));
-                    strcat(especie->dados, limpaDado); // Concatena com dado existente
-                }
-
-                free(limpaDado);
+            // Verifica se dado é NULL ou não
+            if (especie->dados == NULL) {
+                especie->dados = strdup(limpaDado); // Aloca e copia
+            } else {
+                especie->dados = realloc(especie->dados, (strlen(especie->dados) + strlen(limpaDado) + 1) * sizeof(char));
+                strcat(especie->dados, limpaDado); // Concatena com dado existente
             }
+
+            free(limpaDado);
         }
     }
 
     // Imprime as espécies
     especie = inicio;
     while (especie != NULL) {
-        printf("Identificador e Descrição: %s\n", especie->identificador_descricao);
-        printf("Sequência de DNA: %s\n", especie->dados);
-
+        
+            printf("Identificador e Descrição: %s\n", especie->id);
+            printf("Sequência de DNA: %s\n", especie->dados);
+        
         Sequencia *proxima = especie->prox;
-        free(especie->identificador_descricao); // Libera a memória alocada para identificador_descricao
+        free(especie->id); // Libera a memória alocada para id
         free(especie->dados);                   // Libera a memória alocada para dados
         free(especie);                          // Libera a memória alocada para especie
         especie = proxima;
