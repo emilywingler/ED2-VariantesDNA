@@ -8,7 +8,10 @@
 // Definição de estrutura para representar um nó na lista
 typedef struct No {
     char *id; // Identificador e descrição combinados
-    char *dados;                    // Sequência de DNA
+    char *dados;
+    int existe; // 0 ou 1 caso o padrão exista neles
+    int ocorrencias;
+    int *ocorreu; //vetor de ocorrências do padrão
     struct No *prox;
 } Sequencia;
 
