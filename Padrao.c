@@ -2,24 +2,25 @@
 #include <stdio.h>
 #include <string.h>
 
-typedef struct no
-{
+typedef struct {
     char *id;
     char *variante;
-    struct no *prox;
-}Padrao;
+} Padrao;
 
-
-typedef struct f {
+typedef struct No {
     void *info;
-    struct f *prox, *ant;
-} fila;
+    struct No *prox, *ant;
+} No;
 
+typedef struct {
+    No *inicio;
+    No *fim;
+} FilaPadroes;
 
-fila *Cria(void *info) {
-    fila *novo = (fila *)malloc(sizeof(fila));
+No *CriaNo(void *info) {
+    No *novo = (No *)malloc(sizeof(No));
     if (!novo) {
-        printf("Erro de alocação");
+        printf("Erro de alocação\n");
         exit(1);
     }
     novo->info = info;
@@ -28,49 +29,43 @@ fila *Cria(void *info) {
     return novo;
 }
 
-// Entra na fila;
-fila *EntraNaFila(fila *f, void *dado) {
-    fila *novo = Cria(dado);
-    fila *aux = f;
-    
-    while (aux->prox != NULL) {
-        aux = aux->prox;
+FilaPadroes *EntraNaFila(FilaPadroes *f, void *info) {
+    No *novo = CriaNo(info);
+    if (f->inicio == NULL) {
+        f->inicio = novo;
+        f->fim = novo;
+    } else {
+        f->fim->prox = novo;
+        novo->ant = f->fim;
+        f->fim = novo;
     }
-    
-    aux->prox = novo;
-    novo->ant = aux;
-
     return f;
 }
 
-// Sai da fila
-void SaiDaFila(fila **f) {
-    if ((*f)->prox == NULL) {
-        printf("A fila já está vazia\n");
-        return;
-    }
+void SaiDaFila(FilaPadroes *f) {
+    if (f->inicio != NULL) {
+        No *removido = f->inicio;
+        f->inicio = f->inicio->prox;
 
-    fila *aux = (*f)->prox;
-    free(*f);
-    *f = aux;
-    if (*f != NULL) {
-        (*f)->ant = NULL;
+        if (f->inicio != NULL) {
+            f->inicio->ant = NULL;
+        } else {
+            f->fim = NULL;
+        }
+
+        free(removido->info);
+        free(removido);
     }
 }
 
-// Tamanho da fila;
-int tamanho(fila *f) {
-    int count = 0;
-    fila *aux = f->prox; // Pular o nó cabeça
-    while (aux != NULL) {
-        count++;
-        aux = aux->prox;
+void LiberarFila(FilaPadroes *f) {
+    while (f->inicio != NULL) {
+        SaiDaFila(f);
     }
-    return count;
+    free(f);
 }
-// devemos criar um padrão genérico para essa função 
-// porque ela é utilizada por dois arquivos diferentes, Por enquanto deixa assim;
-char *limparPadrao(char *Padrao) {
+
+char *LimparPadrao(const char *Padrao) {
     int i, j = 0;
     char *limpaPadrao = malloc(strlen(Padrao) + 1);
 
@@ -84,83 +79,92 @@ char *limparPadrao(char *Padrao) {
     return limpaPadrao;
 }
 
-void ValidaArquivo(FILE *arquivo){
+int FimDeArquivo(const char *linha) {
+    if (linha[0] == '>' && linha[1] == 'E' && linha[2] == 'O' && linha[3] == 'F') {
+        return 1; // Fim de arquivo
+    }
+    return 0; // Pode continuar
+}
+
+Padrao *AlocaPadrao() {
+    Padrao *virus = (Padrao *)malloc(sizeof(Padrao));
+    // Verifica se a alocação foi bem-sucedida
+    if (!virus) {
+        printf("Erro na alocação de memória\n");
+        exit(1);
+    }
+    return virus;
+}
+
+void validade(FILE *arquivo){
     if (!arquivo) {
         printf("Não foi possível ler o arquivo\n");
         exit(1);
     }
 }
 
-int FimDeArquivo(char *linha){
-    if(linha[0] == '>' && linha[1] == 'E' && linha[2] == 'O' && linha[3] == 'F'){
-            return 1; //fim de arquivo
+No *ProcessaPadrao(FILE *arquivo, FilaPadroes *padroes){
+    char linha[70];
+    // FilaPadroes *padroes = (FilaPadroes *)malloc(sizeof(FilaPadroes));
+    padroes->inicio = NULL;
+    padroes->fim = NULL;
+
+   while (fgets(linha, sizeof(linha), arquivo) != NULL) {
+    linha[strcspn(linha, "\n")] = '\0';
+
+    if (FimDeArquivo(linha)) break;
+
+    Padrao *virus;
+
+    if (linha[0] == '>') {
+        virus = AlocaPadrao();
+        virus->id = strdup(&linha[1]); // Ignora o '>'
+        virus->variante = NULL;
+
+        EntraNaFila(padroes, virus);
+    } else {
+        char *limpaDado = LimparPadrao(linha);
+        Padrao *virusAtual = (Padrao *)padroes->fim->info;
+
+        if (virusAtual->variante == NULL) {
+            virusAtual->variante = strdup(limpaDado);
+        } else {
+            // Realoca a variante para acomodar a nova sequência
+            virusAtual->variante = realloc(virusAtual->variante, (strlen(virusAtual->variante) + strlen(limpaDado) + 1) * sizeof(char));
+            // Concatena a nova sequência à variante existente
+            strcat(virusAtual->variante, limpaDado);
         }
-    return 0; //pode continuar
+
+        free(limpaDado);
+    }
+    }
+
+    return padroes->inicio;
 }
-int main(){
+
+//Tudo funciona agora precisamos mainpular os arqu
+
+int main() {
     FILE *arquivo;
     // Abre o arquivo para leitura
     arquivo = fopen("PadroesVirus.txt", "r");
-    ValidaArquivo(arquivo);
     // Verifica se o arquivo foi aberto com sucesso
+    validade(arquivo);
 
-    char linha[70];
-    
-    Padrao *inicio = NULL;
-    Padrao *virus = NULL;
-    while (fgets(linha, sizeof(linha), arquivo) != NULL)
-    {
-        linha[strcspn(linha, "\n")] = '\0';
-    
-        if(FimDeArquivo(linha)) break;
-        if (linha[0] == '>') {
-            // Alocando memória para o novo nó
-            virus = (Padrao *)malloc(sizeof(Padrao));
+    FilaPadroes *padroes = (FilaPadroes *)malloc(sizeof(FilaPadroes));
 
-            // Verifica se a alocação foi bem-sucedida
-            if (!virus) {
-                printf("Erro na alocação de memória\n");
-                exit(1);
-            }
-
-            // Combinando identificador e descrição em uma única string
-            virus->id = strdup(&linha[1]); // Ignora o '>'
-            
-            // Inicializa a sequência de DNA
-            virus->variante = NULL;
-
-            // Adiciona a nova virus na lista
-            virus->prox = inicio;
-            inicio = virus;
-        } else {
-            // Limpa a sequência apenas se não for uma nova espécie
-            char *limpaDado = limparPadrao(linha);
-
-            // Verifica se dado é NULL ou não
-            if (virus->variante == NULL) {
-                virus->variante = strdup(limpaDado); // Aloca e copia
-            } else {
-                virus->variante = realloc(virus->variante, (strlen(virus->variante) + strlen(limpaDado) + 1) * sizeof(char));
-                strcat(virus->variante, limpaDado); // Concatena com dado existente
-            }
-
-            free(limpaDado);
-        }
-    }
-
-    virus = inicio;
+    No *virus = ProcessaPadrao(arquivo,padroes);
     while (virus != NULL) {
-        
-            printf("Identificador e Descrição: %s\n", virus->id);
-            printf("Sequência de DNA: %s\n", virus->variante);
-        
-        Padrao *proxima = virus->prox;
-        free(virus->id); // Libera a memória alocada para id
-        free(virus->variante);                   // Libera a memória alocada para dados
-        free(virus);                          // Libera a memória alocada para virus
-        virus = proxima;
+        Padrao *padraoAtual = (Padrao *)virus->info;
+        printf("Identificador e Descrição: %s\n", padraoAtual->id);
+        printf("Sequência de DNA: %s\n", padraoAtual->variante);
+
+        virus = virus->prox;
     }
-        
-        return 0;
-    }
-    
+
+    LiberarFila(padroes);
+
+    fclose(arquivo);
+
+    return 0;
+}
