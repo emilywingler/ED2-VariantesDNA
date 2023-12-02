@@ -1,3 +1,5 @@
+// ED2_Grupo <4>_[Emily][Gabrielly][Guilherme][Samuel].zip
+
 #ifndef FILA_H
 #define FILA_H
 
@@ -34,7 +36,8 @@ Fila *EntraNaFila(Fila *f, void *info);
  * Parâmetros:
  *   - f: ponteiro para a fila
  */
-void SaiDaFila(Fila *f);
+No *SaiDaFila(Fila *f);
+
 
 /*
  * Função para liberar a fila e seus nós

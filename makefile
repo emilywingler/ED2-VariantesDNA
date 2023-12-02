@@ -1,30 +1,18 @@
+# ED2_Grupo <4>_[Emily][Gabrielly][Guilherme][Samuel].zip
+
 all: main
 
 main: main.o arquivos.o fila.o
-	gcc -o main $^
+	gcc -o main main.o arquivos.o fila.o
 
 main.o: main.c arquivos.h fila.h
-	gcc -c $<
+	gcc -c main.c arquivos.h fila.h
 
 arquivos.o: arquivos.c arquivos.h fila.h
-	gcc -c $<
+	gcc -c arquivos.c arquivos.h fila.h
 
 fila.o: fila.c fila.h
-	gcc -c $<
+	gcc -c fila.c fila.h
 
 clean:
 	rm -f main main.o arquivos.o fila.o
-
-# all: teste
-
-# teste: main.o fila.o
-# 	gcc -o teste main.o fila.o
-
-# main.o: main.c fila.h
-# 	gcc -c main.c -Wall
-
-# fila.o: fila.c fila.h
-# 	gcc -c fila.c -Wall
-
-# clean:
-# 	rm main.o fila.o teste

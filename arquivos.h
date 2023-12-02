@@ -1,3 +1,5 @@
+// ED2_Grupo <4>_[Emily][Gabrielly][Guilherme][Samuel].zip
+
 #ifndef ARQUIVO_H
 #define ARQUIVO_H
 
@@ -8,13 +10,13 @@
 #include "arquivos.h"
 
 typedef struct {
-    char *id;
-    char *dados;
+    char *id; //identificador da variante
+    char *dados; //Sequencia de DNA: padrao
 } Padrao;
 
 typedef struct {
-    char *id;
-    char *dados;
+    char *id; //indentificador do DNAS
+    char *dados; //Sequencia de DNA: texto
     int *ocorreu;  // Adicione este campo para armazenar as posições das ocorrências
     int ocorreu_count;  // Adicione este campo para rastrear o número de ocorrências
 } Sequencia;

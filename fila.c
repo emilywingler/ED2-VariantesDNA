@@ -1,3 +1,5 @@
+// ED2_Grupo <4>_[Emily][Gabrielly][Guilherme][Samuel].zip
+
 #include <stdlib.h>
 #include <stdio.h>
 #include "fila.h"
@@ -27,7 +29,7 @@ Fila *EntraNaFila(Fila *f, void *info) {
     return f;
 }
 
-void SaiDaFila(Fila *f) {
+No *SaiDaFila(Fila *f) {
     if (f->inicio != NULL) {
         No *removido = f->inicio;
         f->inicio = f->inicio->prox;
@@ -37,14 +39,21 @@ void SaiDaFila(Fila *f) {
         } else {
             f->fim = NULL;
         }
-        free(removido->info);
-        free(removido);
+
+        removido->prox = NULL;
+        removido->ant = NULL;
+
+        return removido;
     }
+
+    return NULL;
 }
 
+// Altere a função para não chamar mais a LiberarNo
 void LiberarFila(Fila *f) {
     while (f->inicio != NULL) {
-        SaiDaFila(f);
+        No *removido = SaiDaFila(f);
+        free(removido);  // Liberar diretamente o nó
     }
     free(f);
 }
@@ -52,12 +61,10 @@ void LiberarFila(Fila *f) {
 
 int TamanhoFila(No *f) {
     int count = 0;
-    No *aux = f; // Pular o nó cabeça
+    No *aux = f;
     while (aux != NULL) {
         count++;
         aux = aux->prox;
     }
     return count;
 }
-
-

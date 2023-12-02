@@ -1,3 +1,5 @@
+// ED2_Grupo <4>_[Emily][Gabrielly][Guilherme][Samuel].zip
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -35,50 +37,45 @@ Padrao *AlocaPadrao() {
     return virus;
 }
 
-void validade(FILE *arquivo){
+void validade(FILE *arquivo) {
     if (!arquivo) {
         printf("Não foi possível ler o arquivo\n");
         exit(1);
     }
 }
 
-No *ProcessaPadrao(FILE *arquivo, Fila *padroes){
+No *ProcessaPadrao(FILE *arquivo, Fila *padroes) {
     char linha[70];
-    // Fila *padroes = (Fila *)malloc(sizeof(Fila));
     padroes->inicio = NULL;
     padroes->fim = NULL;
 
-   while (fgets(linha, sizeof(linha), arquivo) != NULL) {
-    linha[strcspn(linha, "\n")] = '\0';
+    while (fgets(linha, sizeof(linha), arquivo) != NULL) {
+        linha[strcspn(linha, "\n")] = '\0';
 
-    if (FimDeArquivo(linha)) break;
+        if (FimDeArquivo(linha)) break;
 
-    Padrao *virus;
+        Padrao *virus;
 
-    if (linha[0] == '>') {
-        virus = AlocaPadrao();
-        virus->id = strdup(&linha[1]); // Ignora o '>'
-        virus->dados = NULL;
+        if (linha[0] == '>') {
+            virus = AlocaPadrao();
+            virus->id = strdup(&linha[1]); // Ignora o '>'
+            virus->dados = NULL;
 
-        EntraNaFila(padroes, virus);
-    } else {
-        char *limpaDado = LimparPadrao(linha);
-        Padrao *virusAtual = (Padrao *)padroes->fim->info;
-
-        if (virusAtual->dados == NULL) {
-            virusAtual->dados = strdup(limpaDado);
+            EntraNaFila(padroes, virus);
         } else {
-            // Realoca a dados para acomodar a nova sequência
-            virusAtual->dados = realloc(virusAtual->dados, (strlen(virusAtual->dados) + strlen(limpaDado) + 1) * sizeof(char));
-            // Concatena a nova sequência à dados existente
-            strcat(virusAtual->dados, limpaDado);
+            char *limpaDado = LimparPadrao(linha);
+            Padrao *virusAtual = (Padrao *)padroes->fim->info;
+
+            if (virusAtual->dados == NULL) {
+                virusAtual->dados = strdup(limpaDado);
+            } else {
+                virusAtual->dados = realloc(virusAtual->dados, (strlen(virusAtual->dados) + strlen(limpaDado) + 1) * sizeof(char));
+                strcat(virusAtual->dados, limpaDado);
+            }
+
+            free(limpaDado);
         }
-
-        free(limpaDado);
     }
-    }
-
+    
     return padroes->inicio;
 }
-
-

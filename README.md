@@ -28,4 +28,4 @@ DNA). Veja o exemplo a seguir.
     [L034233.4 lobo guara] no. de ocorrencias: 1 posicoes: 44
 
 ### Formato de Entrega
-    ED2_Grupo <número do grupo>_[Emily][Gabrielly][Guilherme][Samuel].zip
+    ED2_Grupo <4>_[Emily][Gabrielly][Guilherme][Samuel].zip

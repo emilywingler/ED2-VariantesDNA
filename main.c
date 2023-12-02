@@ -1,11 +1,11 @@
+// ED2_Grupo <4>_[Emily][Gabrielly][Guilherme][Samuel].zip
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include "fila.h"
 #include "arquivos.h"
 
-
-//Precisamos construir a main: teremos que ter dois laços alinhados: laço externo: variantes, laço interno para avaliar os padrões
 
 // Função para realizar o preprocessamento do padrão usando o algoritmo KMP
 int *preprocessamento(char *padrao, int ptam) {
@@ -38,13 +38,6 @@ int *kmp(char *texto, int ttam, char *padrao, int ptam, Sequencia *padraoDNA) {
 
     if (!pi) {
         return NULL; // Retorna NULL em caso de falha na alocação de memória
-    }
-
-    // Aloca o array para armazenar as posições das ocorrências
-    int *ocorreu = malloc(sizeof(int) * ttam);
-    if (!ocorreu) {
-        free(pi);
-        return NULL;
     }
 
     int *tempOcorreu = malloc(sizeof(int) * ttam);
@@ -91,6 +84,7 @@ void buscaKmp(No *listaDNA, char *padrao, int ttam) {
         free(ocorreu);
         atual = atual->prox;
     }
+    free(atual);
 }
 
 
@@ -110,21 +104,18 @@ int main() {
     No *virus = ProcessaPadrao(arquivo1, padroes);
     No *DNA = ProcessaPadrao(arquivo2, sequencia);
     
-    printf("Antes do loop\n");
-int Qts_padroes = TamanhoFila(virus);
-printf("Quantidade de padrões: %i\n", Qts_padroes);
 
-No *atual = virus;
-for (int i = 0; i < Qts_padroes && atual != NULL; i++) {
-    Padrao *padraoVirus = (Padrao *)atual->info;
-    printf("%s\n", padraoVirus->id);
-    buscaKmp(DNA, padraoVirus->dados, strlen(padraoVirus->dados));
-    printf("\n");
-    atual = atual->prox;
-}
-printf("Depois do loop\n");
+    int Qts_padroes = TamanhoFila(virus);
 
 
+    No *atual = virus;
+    for (int i = 0; i < Qts_padroes && atual != NULL; i++) {
+        Padrao *padraoVirus = (Padrao *)atual->info;
+        printf("%s\n", padraoVirus->id);
+        buscaKmp(DNA, padraoVirus->dados, strlen(padraoVirus->dados));
+        printf("\n");
+        atual = atual->prox;
+    }
 
     LiberarFila(padroes);
     LiberarFila(sequencia);
