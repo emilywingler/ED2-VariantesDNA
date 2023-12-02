@@ -7,14 +7,6 @@
 
 //Precisamos construir a main: teremos que ter dois laços alinhados: laço externo: variantes, laço interno para avaliar os padrões
 
-
-// Definição de estrutura para representar um nó na lista de padrões
-// typedef struct No {
-//     char *padrao;    // Padrão a ser buscado
-//     int ptam;         // Tamanho do padrão
-//     struct No *prox;  // Ponteiro para o próximo nó na lista
-// } No;
-
 // Função para realizar o preprocessamento do padrão usando o algoritmo KMP
 int *preprocessamento(char *padrao, int ptam) {
     int k = -1;
@@ -38,82 +30,71 @@ int *preprocessamento(char *padrao, int ptam) {
 }
 
 // // Função principal para o algoritmo KMP
-// int kmp(char *texto, int ttam, char *padrao, int ptam) {
-//     int i;
-//     int *pi = preprocessamento(padrao, ptam);
-//     int k = -1;
-//     int count = 0;
+int *kmp(char *texto, int ttam, char *padrao, int ptam, Sequencia *padraoDNA) {
+    int i;
+    int *pi = preprocessamento(padrao, ptam);
+    int k = -1;
+    int count = 0;
 
-//     if (!pi) {
-//         return -1; // Retorna -1 em caso de falha na alocação de memória
-//     }
+    if (!pi) {
+        return NULL; // Retorna NULL em caso de falha na alocação de memória
+    }
 
-//     for (i = 0; i < ttam; i++) {
-//         // Loop principal para percorrer o texto e encontrar o padrão
-//         while (k > -1 && padrao[k + 1] != texto[i]) k = pi[k];
-//         if (texto[i] == padrao[k + 1]) k++;
-//         if (k == ptam - 1) {
-//             printf("Encontrou na posição %i.\n", i - k);
-//             count++;
-//         }
-//     }
+    // Aloca o array para armazenar as posições das ocorrências
+    int *ocorreu = malloc(sizeof(int) * ttam);
+    if (!ocorreu) {
+        free(pi);
+        return NULL;
+    }
 
-//     free(pi); // Libera a memória alocada para o array de preprocessamento
-//     return count;
-// }
+    int *tempOcorreu = malloc(sizeof(int) * ttam);
+    if (!tempOcorreu) {
+        free(pi);
+        return NULL;
+    }
 
-// // Função para realizar a busca KMP para cada padrão na lista
-// void buscaKmp(No *listaPadroes, char *texto, int ttam) {
-//     No *atual = listaPadroes;
+    for (i = 0; i < ttam; i++) {
+        // Loop principal para percorrer o texto e encontrar o padrão
+        while (k > -1 && padrao[k + 1] != texto[i]) k = pi[k];
+        if (texto[i] == padrao[k + 1]) k++;
+        if (k == ptam - 1) {
+            tempOcorreu[count++] = i - k;
+        }
+    }
 
-//     while (atual != NULL) {
-//         // Chama a função KMP para cada padrão na lista
-//         int count = kmp(texto, ttam, atual->padrao, atual->ptam);
-//         printf("Vezes em que o padrão '%s' apareceu: %i\n", atual->padrao, count);
-//         atual = atual->prox;
-//     }
-// }
+    free(pi);
 
-// Função para adicionar um novo padrão à lista
-// No *adicionarPadrao(No *lista, char *padrao, int ptam) {
-//     No *novo = (No *)malloc(sizeof(No));
+    // Atribui o array de posições à estrutura Sequencia
+    padraoDNA->ocorreu = tempOcorreu;
+    padraoDNA->ocorreu_count = count;
 
-//     if (!novo) {
-//         printf("Erro na alocação de memória.\n");
-//         exit(1);
-//     }
+    return tempOcorreu;
+}
 
-//     // Atribui os valores ao novo nó na lista
-//     novo->padrao = padrao;
-//     novo->ptam = ptam;
-//     novo->prox = lista;
+void buscaKmp(No *listaDNA, char *padrao, int ttam) {
+    No *atual = listaDNA;
 
-//     return novo;
-// }
+    while (atual != NULL) {
+        Sequencia *padraoDNA = (Sequencia *)atual->info;
+        int *ocorreu = kmp(padraoDNA->dados, strlen(padraoDNA->dados), padrao, strlen(padrao), padraoDNA);
 
-// int main() {
-//     // Texto no qual a busca será realizada
-//     char texto[] = "abacaabaccabacabaabb";
+        if (ocorreu != NULL && padraoDNA->ocorreu_count > 0) {
+            printf("[%s] no. de ocorrencias: %d posicoes:", padraoDNA->id, padraoDNA->ocorreu_count);
 
-//     // Inicialização da lista de padrões
-//     No *listaPadroes = NULL;
-//     listaPadroes = adicionarPadrao(listaPadroes, "aba", 3);
-//     listaPadroes = adicionarPadrao(listaPadroes, "acc", 3);
+            for (int j = 0; j < padraoDNA->ocorreu_count; j++) {
+                printf(" %d", padraoDNA->ocorreu[j]);
+            }
 
-//     // Realiza a busca KMP para cada padrão na lista
-//     buscaKmp(listaPadroes, texto, strlen(texto));
+            printf("\n");
+        }
 
-//     // Libera a memória alocada para cada nó na lista
-//     No *atual = listaPadroes;
-//     while (atual != NULL) {
-//         No *prox = atual->prox;
-//         free(atual);
-//         atual = prox;
-//     }
+        free(ocorreu);
+        atual = atual->prox;
+    }
+}
 
-//     return 0;
-// }
 
+// ..
 int main() {
     FILE *arquivo1, *arquivo2;
     // Abre o arquivo para leitura
@@ -125,44 +106,33 @@ int main() {
 
     Fila *padroes = (Fila *)malloc(sizeof(Fila));
     Fila *sequencia = (Fila *)malloc(sizeof(Fila));
+
+    No *virus = ProcessaPadrao(arquivo1, padroes);
+    No *DNA = ProcessaPadrao(arquivo2, sequencia);
     
-    int count = 0;
+    printf("Antes do loop\n");
+int Qts_padroes = TamanhoFila(virus);
+printf("Quantidade de padrões: %i\n", Qts_padroes);
 
-    No *virus = ProcessaPadrao(arquivo1,padroes);
-    No *DNA = ProcessaPadrao(arquivo2,sequencia);
+No *atual = virus;
+for (int i = 0; i < Qts_padroes && atual != NULL; i++) {
+    Padrao *padraoVirus = (Padrao *)atual->info;
+    printf("%s\n", padraoVirus->id);
+    buscaKmp(DNA, padraoVirus->dados, strlen(padraoVirus->dados));
+    printf("\n");
+    atual = atual->prox;
+}
+printf("Depois do loop\n");
 
-    while (TamanhoFila(virus) <= count ++) {
-        Padrao *padraoVirus = (Padrao *)virus->info;
-        printf("%s\n", padraoVirus->id);
-        printf("Sequência de DNA: %s\n", padraoVirus->dados);
 
-        virus = virus->prox;
-
-
-        count++;
-    }
-
-    variante B12.1
-    [L034233.4 lobo guara] no. de ocorrencias: 2 posicoes: 47 128
-
-    variante C4.3
-    [O989487.1 onca pintada] no. de ocorrencias: 3 posicoes: 47 113 215
-    [L034233.4 lobo guara] no. de ocorrencias: 1 posicoes: 44
-
-    
-
-    while (DNA != NULL) {
-        Sequencia *padraoAtual = (Sequencia *)DNA->info;
-        printf("Identificador e Descrição: %s\n", padraoAtual->id);
-        printf("Sequência de DNA: %s\n", padraoAtual->dados);
-        DNA = DNA->prox;
-    }
 
     LiberarFila(padroes);
     LiberarFila(sequencia);
 
+
     fclose(arquivo1);
     fclose(arquivo2);
 
+    
     return 0;
 }

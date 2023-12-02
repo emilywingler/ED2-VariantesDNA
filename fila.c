@@ -37,7 +37,6 @@ void SaiDaFila(Fila *f) {
         } else {
             f->fim = NULL;
         }
-
         free(removido->info);
         free(removido);
     }

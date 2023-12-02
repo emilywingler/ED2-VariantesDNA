@@ -13,11 +13,10 @@ typedef struct {
 } Padrao;
 
 typedef struct {
-    char *id; // Identificador e descrição combinados
+    char *id;
     char *dados;
-    int existe; // 0 ou 1 caso o padrão exista neles
-    int ocorrencias;
-    int *ocorreu; //vetor de ocorrências do padrão
+    int *ocorreu;  // Adicione este campo para armazenar as posições das ocorrências
+    int ocorreu_count;  // Adicione este campo para rastrear o número de ocorrências
 } Sequencia;
 
 
